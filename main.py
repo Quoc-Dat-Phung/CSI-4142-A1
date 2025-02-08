@@ -1,5 +1,6 @@
 # for loading data
 import json
+import pytrec_eval
 import pandas as pd
 import copy
 import math
@@ -111,8 +112,11 @@ def preprocessing_corpus(df_corpus):
 
   for i in range(len(df_corpus)):
     # title is important for query searching which is why we combine both the title and the text
-    combined_text = df_corpus["title"][i] + " " + df_corpus["text"][i]
-    processed_texts.append(preprocessing(combined_text))
+    title = df_corpus["title"][i]
+    combined_title_text = df_corpus["title"][i] + " " + df_corpus["text"][i]
+
+    # change combined_title_text to title if you only want to include the title in the search
+    processed_texts.append(preprocessing(combined_title_text))
 
   # add this as a new column
   df_corpus["processed_text"] = processed_texts
@@ -292,15 +296,52 @@ def run_queries_and_write_to_file(document_vectors, weighted_inverted_index, df_
                   break
               file.write(f"{r[0]} Q0 {doc_id} {j} {score:.5f} tag_{r[0]}_{doc_id}\n")
 
-stop_words_from_file = load_stopword_file("from_professor/stopwords.txt")
-stop_words.update(stop_words_from_file)
+def calculate_map():
+  # Load qrels/ground truth
+  qrels = {}
+  with open(test_file, "r") as f:
+    next(f)  # Skip header if present
+    for line in f:
+      qid, docid, rel = line.strip().split()
+      if qid not in qrels:
+        qrels[qid] = {}
+      qrels[qid][docid] = int(rel)
 
-df_corpus = load_jsonl_file(corpus_file, corpus_columns)
-df_queries = load_jsonl_file(queries_file, queries_columns)
-df_test = load_tsv_file(test_file, test_columns)
+  # Load results 
+  run = {}
+  with open("results.txt", "r") as f:
+    next(f)  # Skip header
+    for line in f:
+      qid, _, docid, _, score, _ = line.strip().split()
+      if qid not in run:
+        run[qid] = {}
+      run[qid][docid] = float(score)
 
-preprocessing_corpus(df_corpus)
+  # Create evaluator
+  evaluator = pytrec_eval.RelevanceEvaluator(qrels, {'map'})
 
-weighted_inverted_index, document_vectors = build_inverted_index_from_corpus(df_corpus)
+  # Calculate scores
+  results = evaluator.evaluate(run)
 
-run_queries_and_write_to_file(document_vectors, weighted_inverted_index, df_queries, df_corpus)
+  # Calculate mean scores across all queries
+  mean_scores = {}
+  for metric in ['map']:
+    mean_scores[metric] = sum(query_scores[metric] 
+      for query_scores in results.values()) / len(results)
+
+  print(f"Mean Average Precision (MAP): {mean_scores['map']:.4f}")
+
+if __name__ == "__main__":
+  stop_words_from_file = load_stopword_file("from_professor/stopwords.txt")
+  stop_words.update(stop_words_from_file)
+
+  df_corpus = load_jsonl_file(corpus_file, corpus_columns)
+  df_queries = load_jsonl_file(queries_file, queries_columns)
+  df_test = load_tsv_file(test_file, test_columns)
+
+  preprocessing_corpus(df_corpus)
+
+  weighted_inverted_index, document_vectors = build_inverted_index_from_corpus(df_corpus)
+
+  run_queries_and_write_to_file(document_vectors, weighted_inverted_index, df_queries, df_corpus)
+  calculate_map()
