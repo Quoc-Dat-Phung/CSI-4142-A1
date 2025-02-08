@@ -1,6 +1,5 @@
 # for loading data
 import json
-import pytrec_eval
 import pandas as pd
 import copy
 import math
@@ -288,48 +287,13 @@ def run_queries_and_write_to_file(document_vectors, weighted_inverted_index, df_
     res.append([row["_id"], sorted_results])
 
   # We write the results to a file but for each query only the first 100 results
-  with open("results.txt", "w") as file:
+  with open("results_title_and_text.txt", "w") as file:
       file.write("query_id\tQ0\tdoc_id\trank\tscore\ttag\n")
       for _, r in enumerate(res):
           for j, (doc_id, score) in enumerate(r[1].items()):
               if j >= 100:
                   break
               file.write(f"{r[0]} Q0 {doc_id} {j} {score:.5f} tag_{r[0]}_{doc_id}\n")
-
-def calculate_map():
-  # Load qrels/ground truth
-  qrels = {}
-  with open(test_file, "r") as f:
-    next(f)  # Skip header if present
-    for line in f:
-      qid, docid, rel = line.strip().split()
-      if qid not in qrels:
-        qrels[qid] = {}
-      qrels[qid][docid] = int(rel)
-
-  # Load results 
-  run = {}
-  with open("results.txt", "r") as f:
-    next(f)  # Skip header
-    for line in f:
-      qid, _, docid, _, score, _ = line.strip().split()
-      if qid not in run:
-        run[qid] = {}
-      run[qid][docid] = float(score)
-
-  # Create evaluator
-  evaluator = pytrec_eval.RelevanceEvaluator(qrels, {'map'})
-
-  # Calculate scores
-  results = evaluator.evaluate(run)
-
-  # Calculate mean scores across all queries
-  mean_scores = {}
-  for metric in ['map']:
-    mean_scores[metric] = sum(query_scores[metric] 
-      for query_scores in results.values()) / len(results)
-
-  print(f"Mean Average Precision (MAP): {mean_scores['map']:.4f}")
 
 if __name__ == "__main__":
   stop_words_from_file = load_stopword_file("from_professor/stopwords.txt")
@@ -344,4 +308,3 @@ if __name__ == "__main__":
   weighted_inverted_index, document_vectors = build_inverted_index_from_corpus(df_corpus)
 
   run_queries_and_write_to_file(document_vectors, weighted_inverted_index, df_queries, df_corpus)
-  calculate_map()
