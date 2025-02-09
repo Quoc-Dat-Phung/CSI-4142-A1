@@ -2,7 +2,7 @@ import pytrec_eval
 
 # change these values accordingly
 test_file = "scifact/qrels/test.tsv"
-results_file = "results_title_and_text.txt"
+results_file = "results_top_100_title_text.txt"
 
 def calculate_map():
   # Load qrels truth

@@ -43,7 +43,7 @@ def load_stopword_file(filepath):
       # Ignore empty lines
       if word:  
         words.add(word)
-  return stop_words
+  return words
 
 def is_number(s):
   try:
@@ -287,7 +287,7 @@ def run_queries_and_write_to_file(document_vectors, weighted_inverted_index, df_
     res.append([row["_id"], sorted_results])
 
   # We write the results to a file but for each query only the first 100 results
-  with open("results_title_and_text.txt", "w") as file:
+  with open("results_top_100_title_text.txt", "w") as file:
       file.write("query_id\tQ0\tdoc_id\trank\tscore\ttag\n")
       for _, r in enumerate(res):
           for j, (doc_id, score) in enumerate(r[1].items()):
