@@ -11,23 +11,17 @@ def load_jsonl_file(file_path, columns):
       data.append(json.loads(line))
   return pd.DataFrame(data, columns=columns)
 
-def load_tsv_file(file_path, columns):
-  "Load TSV file then return df"
-  return pd.read_csv(file_path, sep="\t", names=columns)
-
 corpus_file = "scifact/corpus.jsonl"
 queries_file = "scifact/queries.jsonl"
 corpus_data = load_jsonl_file(corpus_file, ["_id", "title", "text"])
 queries_data = load_jsonl_file(queries_file, ["_id", "text"])
 
 def get_all_documents(include_title=True):
-  # Combine title and text
   if include_title:
     corpus_data["full_text"] = corpus_data["title"] + " " + corpus_data["text"]
   else:
     corpus_data["full_text"] = corpus_data["text"]
   
-  # Return the documents
   return corpus_data["full_text"].tolist()
 
 def format_results(results, document_ids, documents):
