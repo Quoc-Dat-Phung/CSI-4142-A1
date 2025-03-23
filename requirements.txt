@@ -1,3 +1,6 @@
 pandas
 nltk
 pytrec_eval
+scikit-learn
+tensorflow
+tensorflow_hub
