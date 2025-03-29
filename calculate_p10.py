@@ -32,8 +32,8 @@ def calculate_p10():
     p10_scores = {}
 
     # decided on using a rleevance threshold to determine what docs are relevant
-    #(since determining relevancy can be subjective)
-    relevance_threshold = 0.40
+    #(since determining relevancy can be subjective so can change depending on users opinion)
+    relevance_threshold = 0.75
 
     for query, group in df.groupby("query_id"):
         top_10_docs = group.nsmallest(10, "rank")
