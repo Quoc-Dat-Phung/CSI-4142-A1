@@ -4,3 +4,4 @@ pytrec_eval
 scikit-learn
 tensorflow
 tensorflow_hub
+sentence-transformers
