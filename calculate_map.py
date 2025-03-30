@@ -2,8 +2,8 @@ import pytrec_eval
 
 # change these values accordingly
 test_file = "scifact/qrels/test.tsv"
-results_file = "C:/Users/zakar/OneDrive/Desktop/CSI-4142-A1/res/a2_res_BERT.txt"
-#"C:/Users/zakar/OneDrive/Desktop/CSI-4142-A1/res/a2_res_USE.txt"
+results_file = "res/a2_res_BERT.txt"
+
 def calculate_map(results_file):
   # Load qrels truth
   qrels = {}
