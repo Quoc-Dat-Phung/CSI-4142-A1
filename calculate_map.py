@@ -4,7 +4,7 @@ import pytrec_eval
 test_file = "scifact/qrels/test.tsv"
 results_file = "C:/Users/zakar/OneDrive/Desktop/CSI-4142-A1/res/a2_res_BERT.txt"
 #"C:/Users/zakar/OneDrive/Desktop/CSI-4142-A1/res/a2_res_USE.txt"
-def calculate_map():
+def calculate_map(results_file):
   # Load qrels truth
   qrels = {}
   with open(test_file, "r") as f:
@@ -40,4 +40,7 @@ def calculate_map():
   print(f"Mean Average Precision (MAP): {mean_scores['map']:.4f}")
 
 if __name__ == "__main__":
-  calculate_map()
+  print("MAP for USE code:")
+  calculate_map("res/a2_res_USE.txt")
+  print("MAP for BERT code:")
+  calculate_map("res/a2_res_BERT.txt")
